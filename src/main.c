@@ -1,16 +1,38 @@
 
 #include "stm32f7xx.h"
 #include "lvgl/lvgl.h"
-
+#include "stdint.h"
 #include "hal_stm_lvgl/tft/tft.h"
 #include "hal_stm_lvgl/touchpad/touchpad.h"
+#include "HAL_Driver/Inc/stm32f7xx_hal_gpio.h"
 
 #include "lvgl/demos/lv_demos.h"
 #include "lvgl/examples/lv_examples.h"
-//#include "lvgl/examples/cha"
 #include "inc/ui/ui.h"
-
+#include "inc/dht11.h"
+#include "inc/tim.h"
+#include "stm32f7xx_hal_conf.h"
+#include "stm32f7xx_hal_gpio.h"
 static void SystemClock_Config(void);
+//void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+//{	static uint32_t ms_elapsed = 0;
+//	if( htim->Instance == TIM7){
+//	HAL_GPIO_TogglePin(GPIOI, GPIO_PIN_1);
+//	ms_elapsed = HAL_GetTick() - ms_elapsed;
+//	}
+//}
+void TIM7_IRQHandler(void)
+{
+  HAL_TIM_IRQHandler(&tim7);
+}
+
+
+uint8_t Rh_byte1, Rh_byte2, Temp_byte1, Temp_byte2;
+uint16_t SUM, RH, TEMP;
+
+float Temperature = 0;
+float Humidity = 0;
+uint8_t Presence = 0;
 
 int main(void)
 {
@@ -18,21 +40,34 @@ int main(void)
 
     /* Configure the system clock to 216 MHz */
     SystemClock_Config();
+	HAL_Delay(40);
+	tim7_init();
+	HAL_Delay(40);
 
     /* Enable I-Cache */
     SCB_EnableICache();
-
     /* Enable D-Cache */
     SCB_EnableDCache();
 
     lv_init();
-
     tft_init();
     touchpad_init();
-
     init_main_screen();
-//    lv_example_grid_1();
-//    lv_demo_widgets();
+
+    /*config of DHT11 sensor*/
+    DHT11_Start();
+	Presence = DHT11_Check_Response();
+	Rh_byte1 = DHT11_Read ();
+	Rh_byte2 = DHT11_Read ();
+	Temp_byte1 = DHT11_Read ();
+	Temp_byte2 = DHT11_Read ();
+	SUM = DHT11_Read();
+
+	TEMP = ((Temp_byte1<<8)|Temp_byte2);
+	RH = ((Rh_byte1<<8)|Rh_byte2);
+
+	Temperature = (float) (TEMP/10.0);
+	Humidity = (float) (RH/10.0);
 
     while (1)
     {
@@ -48,6 +83,10 @@ static void SystemClock_Config(void)
 
     /* Enable Power Control clock */
     __HAL_RCC_PWR_CLK_ENABLE();
+//    __HAL_RCC_GPIOI_CLK_ENABLE();
+    __HAL_RCC_TIM7_CLK_ENABLE();
+//    __HAL_RCC_TIM6_CLK_ENABLE();
+
 
     /* The voltage scaling allows optimizing the power consumption when the device is
      clocked below the maximum system frequency, to update the voltage scaling value
@@ -70,12 +109,13 @@ static void SystemClock_Config(void)
     HAL_PWREx_EnableOverDrive();
 
     /* Select PLL as system clock source and configure the HCLK, PCLK1 and PCLK2
-     clocks dividers */
+//     clocks dividers */
     RCC_ClkInitStruct.ClockType = (RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2);
     RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
     RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
     RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
     RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
     HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_6);
+
 }
 
