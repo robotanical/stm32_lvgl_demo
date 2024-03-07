@@ -1,5 +1,6 @@
 
 #include "stm32f7xx.h"
+#include "stm32746g_discovery.h"
 #include "lvgl/lvgl.h"
 #include "stdint.h"
 #include "hal_stm_lvgl/tft/tft.h"
@@ -13,26 +14,12 @@
 #include "inc/tim.h"
 #include "stm32f7xx_hal_conf.h"
 #include "stm32f7xx_hal_gpio.h"
+
 static void SystemClock_Config(void);
-//void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
-//{	static uint32_t ms_elapsed = 0;
-//	if( htim->Instance == TIM7){
-//	HAL_GPIO_TogglePin(GPIOI, GPIO_PIN_1);
-//	ms_elapsed = HAL_GetTick() - ms_elapsed;
-//	}
-//}
 void TIM7_IRQHandler(void)
 {
   HAL_TIM_IRQHandler(&tim7);
 }
-
-
-uint8_t Rh_byte1, Rh_byte2, Temp_byte1, Temp_byte2;
-uint16_t SUM, RH, TEMP;
-
-float Temperature = 0;
-float Humidity = 0;
-uint8_t Presence = 0;
 
 int main(void)
 {
@@ -41,6 +28,7 @@ int main(void)
     /* Configure the system clock to 216 MHz */
     SystemClock_Config();
 	HAL_Delay(40);
+
 	tim7_init();
 	HAL_Delay(40);
 
@@ -53,26 +41,32 @@ int main(void)
     tft_init();
     touchpad_init();
     init_main_screen();
-
+delay_us(10);
     /*config of DHT11 sensor*/
-    DHT11_Start();
-	Presence = DHT11_Check_Response();
-	Rh_byte1 = DHT11_Read ();
-	Rh_byte2 = DHT11_Read ();
-	Temp_byte1 = DHT11_Read ();
-	Temp_byte2 = DHT11_Read ();
-	SUM = DHT11_Read();
-
-	TEMP = ((Temp_byte1<<8)|Temp_byte2);
-	RH = ((Rh_byte1<<8)|Rh_byte2);
-
-	Temperature = (float) (TEMP/10.0);
-	Humidity = (float) (RH/10.0);
+//    DHT11_Start();
+//	Presence = DHT11_Check_Response();
+//	Rh_byte1 = DHT11_Read();
+//	Rh_byte2 = DHT11_Read();
+//	Temp_byte1 = DHT11_Read();
+//	Temp_byte2 = DHT11_Read();
+//	SUM = DHT11_Read();
+//
+//	TEMP = ((Temp_byte1<<8)|Temp_byte2);
+//	RH = ((Rh_byte1<<8)|Rh_byte2);
+//
+//	Temperature = (float) (TEMP/10.0);
+//	Humidity = (float) (RH/10.0);
+//dht11_t dht;
+//readDHT11(&dht);
+//while (dht.humidty == 0)
+//{readDHT11(&dht);set_humidity_label_text(dht.humidty);}
 
     while (1)
     {
         HAL_Delay(5);
         lv_task_handler();
+//        readDHT11(&dht);
+//        set_humidity_label_text(dht.humidty);
     }
 }
 

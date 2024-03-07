@@ -1,4 +1,18 @@
 #include "inc/ui/ui.h"
+lv_obj_t* humidity_label_cont;
+lv_obj_t * humidity_val_cont;
+lv_obj_t *screen;
+lv_obj_t *text_label;
+lv_obj_t *humidity_label;
+lv_style_t style;
+lv_obj_t *grid_cont;
+lv_obj_t *text_label_cont;
+lv_obj_t * cont;
+lv_obj_t * chart_cont;
+lv_obj_t * chart;
+lv_obj_t* y_axis_scale;
+lv_chart_series_t * ser ;
+lv_obj_t* humi_text_label;
 void draw_event_cb(lv_event_t * e)
 {
     lv_draw_task_t * draw_task = lv_event_get_draw_task(e);
@@ -39,18 +53,14 @@ void add_data(lv_timer_t * timer){
     }
 };
 
+
 void init_main_screen(){
-		lv_obj_t *screen;
-		lv_obj_t *text_label;
-		lv_obj_t *humidity_label;
-		lv_style_t style;
-		lv_obj_t *grid_cont;
 
 
 		static int32_t col_dsc[] = {200, 280, LV_GRID_TEMPLATE_LAST};
 		static int32_t row_dsc[] = {136, 136, LV_GRID_TEMPLATE_LAST};
 		LV_FONT_DECLARE(muli_light_24);
-	    lv_obj_t * cont = lv_obj_create(lv_scr_act());
+	    cont = lv_obj_create(lv_scr_act());
 	    lv_obj_set_style_grid_column_dsc_array(cont, col_dsc, 0);
 	    lv_obj_set_style_grid_row_dsc_array(cont, row_dsc, 0);
 	    lv_obj_set_size(cont, 480, 272);
@@ -64,7 +74,7 @@ void init_main_screen(){
 	    lv_obj_set_style_border_width(cont, 0, 0);
 
 
-		lv_obj_t *text_label_cont = lv_obj_create(cont);
+		text_label_cont = lv_obj_create(cont);
 		lv_obj_set_size(text_label_cont, 200, 136);
 		lv_obj_set_grid_cell(text_label_cont, LV_GRID_ALIGN_START, 0, 1,
 					 LV_GRID_ALIGN_START, 0, 1);
@@ -75,7 +85,6 @@ void init_main_screen(){
 		lv_label_set_text_fmt(text_label,
 						   "Temperatura\n" "dobowa:");
 
-		lv_obj_t* humidity_label_cont;
 		humidity_label_cont = lv_obj_create(cont);
 		lv_obj_set_size(humidity_label_cont, 200, 136);
 		lv_obj_set_grid_cell(humidity_label_cont, LV_GRID_ALIGN_START, 0, 1,
@@ -88,7 +97,7 @@ void init_main_screen(){
 						   "Wilgotność\n" "powietrza:");
 
 		/*Create a chart*/
-		lv_obj_t * chart_cont = lv_obj_create(cont);
+		chart_cont = lv_obj_create(cont);
 		lv_obj_set_size(chart_cont, 280, 136);
 //		lv_obj_set_style_pad_top(chart_cont, 20, 0);
 		lv_obj_set_style_pad_left(chart_cont, 20, 0);
@@ -98,7 +107,6 @@ void init_main_screen(){
 
 		lv_obj_set_grid_cell(chart_cont, LV_GRID_ALIGN_CENTER, 1, 1,
 			LV_GRID_ALIGN_CENTER, 0, 1);
-		lv_obj_t * chart;
 		chart = lv_chart_create(chart_cont);
 		lv_obj_set_style_border_width(chart_cont, 0, 0);
 		lv_obj_set_size(chart, 200, 106);
@@ -115,7 +123,7 @@ void init_main_screen(){
 		lv_obj_set_style_pad_right(chart, 0, LV_PART_MAIN);
 		lv_obj_set_style_pad_left(chart, 0, LV_PART_MAIN);
 		lv_obj_set_style_border_width(chart, 0, 0);  // border
-		lv_obj_t* y_axis_scale = lv_scale_create(chart_cont);
+		y_axis_scale = lv_scale_create(chart_cont);
 		lv_scale_set_mode(y_axis_scale, LV_SCALE_MODE_VERTICAL_LEFT);
 		lv_obj_set_size(y_axis_scale,lv_pct(0),106);
 	    lv_scale_set_total_tick_count(y_axis_scale, 6);
@@ -123,8 +131,25 @@ void init_main_screen(){
 	    lv_scale_set_range(y_axis_scale, 0, 60);
 	    lv_obj_set_style_pad_hor(y_axis_scale, lv_chart_get_first_point_center_offset(chart), 0);
 
-		lv_chart_series_t * ser = lv_chart_add_series(chart, lv_palette_main(LV_PALETTE_RED), LV_CHART_AXIS_PRIMARY_Y);//		    uint32_t i;
+		ser = lv_chart_add_series(chart, lv_palette_main(LV_PALETTE_RED), LV_CHART_AXIS_PRIMARY_Y);//		    uint32_t i;
 
 		lv_timer_create(add_data, 10, chart);
 
+		humidity_val_cont = lv_obj_create(cont);
+				lv_obj_set_size(humidity_val_cont, 280, 136);
+		//		lv_obj_set_style_pad_top(chart_cont, 20, 0);
+				lv_obj_set_style_pad_left(humidity_val_cont, 20, 0);
+			    lv_obj_set_scrollbar_mode(humidity_val_cont, LV_SCROLLBAR_MODE_OFF);
+				lv_obj_set_grid_cell(humidity_val_cont, LV_GRID_ALIGN_CENTER, 1, 1,
+					LV_GRID_ALIGN_CENTER, 1, 1);
+		humi_text_label = lv_label_create(humidity_val_cont);
+		lv_obj_set_style_border_width(humidity_val_cont, 0, 0);
+		lv_obj_set_style_text_font(humi_text_label, &muli_light_24, 0);
+		lv_label_set_long_mode(humi_text_label, LV_LABEL_LONG_WRAP);
+		lv_label_set_text_fmt(humi_text_label,
+						   "0.0");
 };
+void set_humidity_label_text(uint8_t humi_val)
+{
+	lv_label_set_text_fmt(humi_text_label,"%u", humi_val);
+}

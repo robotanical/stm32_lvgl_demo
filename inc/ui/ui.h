@@ -53,7 +53,7 @@
 #include "lvgl/lvgl.h"
 static void draw_event_cb(lv_event_t * e);
 static void add_data(lv_timer_t * timer);
-
+void set_humidity_label_text(uint8_t humi_val);
 
 void init_main_screen();
 
