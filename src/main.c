@@ -20,7 +20,9 @@ void TIM7_IRQHandler(void)
 {
   HAL_TIM_IRQHandler(&tim7);
 }
-
+uint8_t Presence, Rh_byte1, Rh_byte2, Temp_byte1, Temp_byte2, SUM;
+uint16_t TEMP, RH;
+float Temperature, Humidity;
 int main(void)
 {
     HAL_Init();
@@ -41,21 +43,35 @@ int main(void)
     tft_init();
     touchpad_init();
     init_main_screen();
-delay_us(10);
+    BSP_LED_Init(LED1);
+    BSP_LED_Toggle(LED1);
+
+    for(int j=0; j<20; j++){
+    for (int i=0; i<20; i++)
+    {
+     delay_us(50000);
+    }
+    BSP_LED_Toggle(LED1);
+    }
+    BSP_LED_DeInit(LED1);
+
     /*config of DHT11 sensor*/
-//    DHT11_Start();
-//	Presence = DHT11_Check_Response();
-//	Rh_byte1 = DHT11_Read();
-//	Rh_byte2 = DHT11_Read();
-//	Temp_byte1 = DHT11_Read();
-//	Temp_byte2 = DHT11_Read();
-//	SUM = DHT11_Read();
-//
-//	TEMP = ((Temp_byte1<<8)|Temp_byte2);
-//	RH = ((Rh_byte1<<8)|Rh_byte2);
-//
-//	Temperature = (float) (TEMP/10.0);
-//	Humidity = (float) (RH/10.0);
+    DHT11_Start();
+	Presence = DHT11_Check_Response();
+	if (Presence == 1)
+	{
+	Rh_byte1 = DHT11_Read();
+	Rh_byte2 = DHT11_Read();
+	Temp_byte1 = DHT11_Read();
+	Temp_byte2 = DHT11_Read();
+	SUM = DHT11_Read();
+
+	TEMP = ((Temp_byte1<<8)|Temp_byte2);
+	RH = ((Rh_byte1<<8)|Rh_byte2);
+
+	Temperature = (float) (TEMP/10.0);
+	Humidity = (float) (RH/10.0);
+	}
 //dht11_t dht;
 //readDHT11(&dht);
 //while (dht.humidty == 0)
@@ -66,7 +82,7 @@ delay_us(10);
         HAL_Delay(5);
         lv_task_handler();
 //        readDHT11(&dht);
-//        set_humidity_label_text(dht.humidty);
+        set_humidity_label_text(RH);
     }
 }
 

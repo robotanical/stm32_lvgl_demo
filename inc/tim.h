@@ -7,7 +7,7 @@ void tim7_init()
 {
 	tim7.Instance = TIM7;
 	tim7.Init.Period = 0xFFFF;
-	tim7.Init.Prescaler = 216-1;
+	tim7.Init.Prescaler = 108-1;
 	tim7.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
 	tim7.Init.CounterMode = TIM_COUNTERMODE_UP;
 	tim7.Init.RepetitionCounter = 0;

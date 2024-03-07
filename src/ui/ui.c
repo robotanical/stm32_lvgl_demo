@@ -149,7 +149,7 @@ void init_main_screen(){
 		lv_label_set_text_fmt(humi_text_label,
 						   "0.0");
 };
-void set_humidity_label_text(uint8_t humi_val)
+void set_humidity_label_text(uint16_t humi_val)
 {
-	lv_label_set_text_fmt(humi_text_label,"%u", humi_val);
+	lv_label_set_text_fmt(humi_text_label,"%hu", humi_val);
 }

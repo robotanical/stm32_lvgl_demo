@@ -27,8 +27,8 @@ void DHT11_Start(void)
 {
 	GPIO_InitTypeDef GPIO_InitDef;
 	GPIO_InitDef.Pin = DHT11_PIN;
-	GPIO_InitDef.Mode = GPIO_MODE_INPUT;
-	GPIO_InitDef.Pull = GPIO_PULLDOWN;
+	GPIO_InitDef.Mode = GPIO_MODE_OUTPUT_PP;
+	GPIO_InitDef.Pull = GPIO_NOPULL;
 	HAL_GPIO_Init(DHT11_PORT, &GPIO_InitDef);
 
 }
@@ -36,11 +36,21 @@ void DHT11_Start(void)
 uint8_t DHT11_Check_Response (void)
 {
 	uint8_t Response = 0;
+	HAL_GPIO_WritePin(DHT11_PORT, DHT11_PIN, GPIO_PIN_SET);
+	delay_us(10);
+	HAL_GPIO_WritePin(DHT11_PORT, DHT11_PIN, GPIO_PIN_RESET);
+	delay_us(18);
+	GPIO_InitTypeDef GPIO_InitDef;
+		GPIO_InitDef.Pin = DHT11_PIN;
+		GPIO_InitDef.Mode = GPIO_MODE_INPUT;
+		GPIO_InitDef.Pull = GPIO_PULLUP;
+		HAL_GPIO_Init(DHT11_PORT, &GPIO_InitDef);
 	delay_us(40);
 	if (!(HAL_GPIO_ReadPin (DHT11_PORT, DHT11_PIN)))
 	{
 		delay_us(80);
-		while(!(HAL_GPIO_ReadPin(DHT11_PORT, DHT11_PIN))) {delay_us(10);}
+		if ((HAL_GPIO_ReadPin (DHT11_PORT, DHT11_PIN))) Response = 1;
+				else Response = -1; // 255
 	}
 	while ((HAL_GPIO_ReadPin(DHT11_PORT, DHT11_PIN)));   // wait for the pin to go low
 
@@ -71,14 +81,14 @@ void set_dht11_gpio_mode(uint8_t pMode)
 	{
 	  GPIO_InitStruct.Pin = DHT11_PIN;
 	  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-	  GPIO_InitStruct.Pull = GPIO_PULLUP;
+	  GPIO_InitStruct.Pull = GPIO_NOPULL;
 	  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
 	  HAL_GPIO_Init(DHT11_PORT, &GPIO_InitStruct);
 	}else if(pMode == INPUT)
 	{
 	  GPIO_InitStruct.Pin = DHT11_PIN;
 	  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-	  GPIO_InitStruct.Pull = GPIO_PULLUP;
+	  GPIO_InitStruct.Pull = GPIO_NOPULL;
 	  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
 	  HAL_GPIO_Init(DHT11_PORT, &GPIO_InitStruct);
 	}
